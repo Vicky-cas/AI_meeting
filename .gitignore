@@ -1,0 +1,18 @@
+# Local documentation and setup files
+SDD/
+
+# Python virtual environment
+venv/
+
+# Environment variables and secrets
+.env
+
+# Python cache
+__pycache__/
+
+# Python compiled files
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db

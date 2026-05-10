@@ -7,6 +7,16 @@ venv/
 # Environment variables and secrets
 .env
 
+# Log files
+*.log
+logs/
+
+# SQLite database files
+database/
+*.db
+*.sqlite
+*.sqlite3
+
 # Python cache
 __pycache__/
 

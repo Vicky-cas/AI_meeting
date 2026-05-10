@@ -1,6 +1,6 @@
 services:
   api:
-    image: ai-meeting-copilot:latest
+    image: ai-meeting-assistance:latest
     build: .
     ports:
       - "8000:8000"
@@ -8,9 +8,10 @@ services:
       - .env
     volumes:
       - ./data:/app/data
+      - ./database:/app/database
 
   ui:
-    image: ai-meeting-copilot:latest
+    image: ai-meeting-assistance:latest
     build: .
     command: streamlit run ui/streamlit_app.py --server.address=0.0.0.0 --server.port=8501 --server.headless=true
     ports:

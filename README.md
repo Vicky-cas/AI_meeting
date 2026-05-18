@@ -1,4 +1,4 @@
-# AI Meeting Assistance
+# AI Meeting Copilot
 
 這是一個輕量級的企業 AI 工作流程助理，用來把會議紀錄、需求訪談、Bug 回報或 API 需求整理成可執行的軟體開發輸出。
 

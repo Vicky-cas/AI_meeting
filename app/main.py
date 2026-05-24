@@ -1,4 +1,4 @@
-"""FastAPI entry point for AI Meeting Assistance."""
+"""FastAPI entry point for AI Meeting Copilot."""
 
 from fastapi import FastAPI
 from openai import OpenAI
@@ -9,7 +9,7 @@ from app.db import get_history, init_db, save_meeting
 from app.rag import search_knowledge
 
 
-app = FastAPI(title="AI Meeting Assistance")
+app = FastAPI(title="AI Meeting Copilot")
 init_db()
 
 
@@ -116,7 +116,7 @@ def main() -> None:
     """Run the application."""
     api_key = get_openai_api_key(required=False)
     status = "已設定" if api_key else "未設定"
-    print(f"AI Meeting Assistance - OpenAI API key {status}")
+    print(f"AI Meeting Copilot - OpenAI API key {status}")
 
 
 if __name__ == "__main__":

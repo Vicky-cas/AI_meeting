@@ -1,4 +1,4 @@
-"""Streamlit UI for AI Meeting Assistance."""
+"""Streamlit UI for AI Meeting Copilot."""
 
 import html
 import os
@@ -12,7 +12,7 @@ HISTORY_URL = os.getenv("HISTORY_URL", API_URL.rsplit("/", 1)[0] + "/history")
 
 
 st.set_page_config(
-    page_title="AI Meeting Assistance",
+    page_title="AI Meeting Copilot",
     page_icon="AI",
     layout="wide",
 )
@@ -273,7 +273,7 @@ li[role="option"]:hover {
 
 st.markdown(
     """
-<div class="hero-title">AI Meeting Assistance</div>
+<div class="hero-title">AI Meeting Copilot</div>
 <div class="hero-subtitle">
 將會議紀錄、需求訪談與 Bug 回報整理成需求摘要、TODO、API 草稿與可重複使用的知識筆記。
 </div>

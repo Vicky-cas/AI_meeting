@@ -1,4 +1,4 @@
-"""Prompt templates for AI Meeting Assistance."""
+"""Prompt templates for AI Meeting Copilot."""
 
 
 def build_meeting_summary_prompt(content: str) -> str:

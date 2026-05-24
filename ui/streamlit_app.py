@@ -15,17 +15,27 @@ st.set_page_config(
     page_title="AI Meeting Copilot",
     page_icon="AI",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown(
     """
 <style>
 #MainMenu,
-header,
 footer,
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 [data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
+header {
+    background: transparent !important;
+}
+
+button[kind="header"],
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapsedControl"] {
     display: none !important;
 }
 
@@ -39,37 +49,52 @@ footer,
 }
 
 [data-testid="stSidebar"] {
+    display: none !important;
+}
+
+.nav-panel {
     background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
-    border-right: 1px solid rgba(56, 189, 248, 0.22);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    border-radius: 14px;
+    padding: 20px 18px;
+    position: sticky;
+    top: 1.5rem;
 }
 
-[data-testid="stSidebar"] > div:first-child {
-    padding-top: 2rem;
-    padding-left: 1.4rem;
-    padding-right: 1.4rem;
+.nav-title {
+    color: #f8fafc;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 14px;
 }
 
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3,
-[data-testid="stSidebar"] p,
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] span {
-    color: #e5e7eb !important;
+.nav-caption {
+    color: #93c5fd;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
 }
 
-[data-testid="stSidebar"] hr {
-    border-color: rgba(148, 163, 184, 0.18);
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-}
-
-[data-testid="stSidebar"] [role="radiogroup"] label {
+[role="radiogroup"] label {
     background: rgba(2, 6, 23, 0.45);
     border: 1px solid rgba(148, 163, 184, 0.14);
     border-radius: 12px;
     margin-bottom: 8px;
-    padding: 10px 12px;
+    padding: 12px 14px;
+}
+
+[role="radiogroup"] label:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(15, 23, 42, 0.82);
+}
+
+[role="radiogroup"] label p,
+[role="radiogroup"] label span {
+    color: #f8fafc !important;
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .hero-title {
@@ -271,103 +296,101 @@ li[role="option"]:hover {
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    """
+nav_col, content_col = st.columns([0.18, 0.82], gap="large")
+
+with nav_col:
+    page = st.radio("頁面", ["輸入輸出", "歷史紀錄"], label_visibility="collapsed")
+
+with content_col:
+    st.markdown(
+        """
 <div class="hero-title">AI Meeting Copilot</div>
 <div class="hero-subtitle">
 將會議紀錄、需求訪談與 Bug 回報整理成需求摘要、TODO、API 草稿與可重複使用的知識筆記。
 </div>
 """,
-    unsafe_allow_html=True,
-)
+        unsafe_allow_html=True,
+    )
 
-with st.sidebar:
-    st.markdown("## 控制面板")
+    if page == "輸入輸出":
+        left, right = st.columns([0.85, 1.15], gap="large")
 
-    page = st.radio("頁面", ["輸入輸出", "歷史紀錄"], label_visibility="collapsed")
-
-    st.markdown("---")
-    st.caption("AI 輔助的軟體工作流程整理工具。")
-
-if page == "輸入輸出":
-    left, right = st.columns([0.85, 1.15], gap="large")
-
-    with left:
-        st.markdown(
-            """
+        with left:
+            st.markdown(
+                """
         <div class="metric-card">
             <div class="section-label">輸入</div>
             <div class="card-title">會議與需求來源</div>
         </div>
         """,
-            unsafe_allow_html=True,
-        )
+                unsafe_allow_html=True,
+            )
 
-        meeting_text = st.text_area(
-            "貼上內容",
-            height=420,
-            label_visibility="collapsed",
-            placeholder="貼上 PM 需求、會議紀錄、Bug 回報或 API 需求...",
-        )
+            meeting_text = st.text_area(
+                "貼上內容",
+                height=420,
+                label_visibility="collapsed",
+                placeholder="貼上 PM 需求、會議紀錄、Bug 回報或 API 需求...",
+            )
 
-        analyze = st.button("開始分析")
+            analyze = st.button("開始分析")
 
-    with right:
-        st.markdown(
-            """
+        with right:
+            st.markdown(
+                """
         <div class="metric-card">
             <div class="section-label">AI 輸出</div>
             <div class="card-title">結構化工作流程結果</div>
         </div>
         """,
-            unsafe_allow_html=True,
-        )
+                unsafe_allow_html=True,
+            )
 
-        if analyze:
-            if not meeting_text.strip():
-                st.warning("請先貼上要分析的內容。")
-            else:
-                try:
-                    with st.spinner("AI 正在整理需求內容..."):
-                        response = requests.post(
-                            API_URL,
-                            json={"content": meeting_text},
-                            timeout=90,
-                        )
-
-                    response.raise_for_status()
-                    payload = response.json()
-                    result = payload.get("result", "")
-                    related_knowledge = payload.get("related_knowledge", [])
-
-                    with st.container(border=True):
-                        st.markdown(result)
-
-                    st.markdown(
-                        '<div class="rag-box"><div class="rag-title">RAG 檢索到的知識筆記</div>',
-                        unsafe_allow_html=True,
-                    )
-                    if related_knowledge:
-                        for item in related_knowledge:
-                            source = item.get("source", "未知來源")
-                            distance = item.get("distance")
-                            label = (
-                                f"{source} - 距離 {distance:.4f}"
-                                if isinstance(distance, float)
-                                else source
+            if analyze:
+                if not meeting_text.strip():
+                    st.warning("請先貼上要分析的內容。")
+                else:
+                    try:
+                        with st.spinner("AI 正在整理需求內容..."):
+                            response = requests.post(
+                                API_URL,
+                                json={"content": meeting_text},
+                                timeout=90,
                             )
-                            with st.expander(label):
-                                st.markdown(item.get("content", ""))
-                    else:
-                        st.info("沒有找到相關的知識筆記。")
-                    st.markdown("</div>", unsafe_allow_html=True)
 
-                except requests.exceptions.RequestException as exc:
-                    st.error(f"API 請求失敗：{exc}")
-        else:
-            with st.container(border=True):
-                st.markdown(
-                    """
+                        response.raise_for_status()
+                        payload = response.json()
+                        result = payload.get("result", "")
+                        related_knowledge = payload.get("related_knowledge", [])
+
+                        with st.container(border=True):
+                            st.markdown(result)
+
+                        st.markdown(
+                            '<div class="rag-box"><div class="rag-title">RAG 檢索到的知識筆記</div>',
+                            unsafe_allow_html=True,
+                        )
+                        if related_knowledge:
+                            for item in related_knowledge:
+                                source = item.get("source", "未知來源")
+                                distance = item.get("distance")
+                                label = (
+                                    f"{source} - 距離 {distance:.4f}"
+                                    if isinstance(distance, float)
+                                    else source
+                                )
+                                with st.expander(label):
+                                    st.markdown(item.get("content", ""))
+                        else:
+                            st.info("沒有找到相關的知識筆記。")
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                    except requests.exceptions.RequestException as exc:
+                        st.error(f"API 請求失敗：{exc}")
+            else:
+                with st.container(border=True):
+                    st.markdown(
+                        """
 等待輸入來源內容。
 
 貼上 PM 需求、會議紀錄或 Bug 回報後，可產生：
@@ -377,78 +400,78 @@ if page == "輸入輸出":
 - API 草稿
 - 知識筆記
 """
-                )
+                    )
 
-else:
-    st.markdown('<div class="history-section">', unsafe_allow_html=True)
-    st.markdown(
-        """
+    else:
+        st.markdown('<div class="history-section">', unsafe_allow_html=True)
+        st.markdown(
+            """
     <div class="metric-card">
         <div class="section-label">歷史紀錄</div>
         <div class="card-title">近期分析紀錄</div>
     </div>
     """,
-        unsafe_allow_html=True,
-    )
+            unsafe_allow_html=True,
+        )
 
-    try:
-        history_response = requests.get(HISTORY_URL, timeout=10)
-        history_response.raise_for_status()
-        history_items = history_response.json()
+        try:
+            history_response = requests.get(HISTORY_URL, timeout=10)
+            history_response.raise_for_status()
+            history_items = history_response.json()
 
-        if history_items:
-            page_size = 10
-            total_pages = max(1, (len(history_items) + page_size - 1) // page_size)
-            current_page = min(st.session_state.get("history_page", 1), total_pages)
-            st.session_state.history_page = current_page
+            if history_items:
+                page_size = 10
+                total_pages = max(1, (len(history_items) + page_size - 1) // page_size)
+                current_page = min(st.session_state.get("history_page", 1), total_pages)
+                st.session_state.history_page = current_page
 
-            start_index = (current_page - 1) * page_size
-            end_index = start_index + page_size
-            page_items = history_items[start_index:end_index]
+                start_index = (current_page - 1) * page_size
+                end_index = start_index + page_size
+                page_items = history_items[start_index:end_index]
 
-            st.markdown('<div class="history-list">', unsafe_allow_html=True)
-            for item in page_items:
-                created_at = html.escape(item.get("created_at", ""))
-                content = item.get("content", "")
-                ai_result = item.get("ai_result", "")
-                preview = html.escape(content[:220] + ("..." if len(content) > 220 else ""))
+                st.markdown('<div class="history-list">', unsafe_allow_html=True)
+                for item in page_items:
+                    created_at = html.escape(item.get("created_at", ""))
+                    content = item.get("content", "")
+                    ai_result = item.get("ai_result", "")
+                    preview = html.escape(content[:220] + ("..." if len(content) > 220 else ""))
 
-                st.markdown(
-                    f"""
+                    st.markdown(
+                        f"""
     <div class="history-item">
         <div class="history-date">{created_at}</div>
         <div class="history-content">{preview}</div>
     </div>
     """,
-                    unsafe_allow_html=True,
-                )
-                with st.expander("查看結果"):
-                    st.markdown(ai_result)
-            st.markdown("</div>", unsafe_allow_html=True)
+                        unsafe_allow_html=True,
+                    )
+                    with st.expander("查看結果"):
+                        st.markdown(ai_result)
+                st.markdown("</div>", unsafe_allow_html=True)
 
-            previous_col, status_col, next_col = st.columns([1, 1.4, 1])
-            with previous_col:
-                if st.button("上一頁", disabled=current_page <= 1, use_container_width=True):
-                    st.session_state.history_page = current_page - 1
-                    st.rerun()
-            with status_col:
-                selected_page = st.selectbox(
-                    "頁碼選擇",
-                    range(1, total_pages + 1),
-                    index=current_page - 1,
-                    format_func=lambda page_number: f"第 {page_number} / {total_pages} 頁",
-                    label_visibility="collapsed",
-                )
-                if selected_page != current_page:
-                    st.session_state.history_page = selected_page
-                    st.rerun()
-            with next_col:
-                if st.button("下一頁", disabled=current_page >= total_pages, use_container_width=True):
-                    st.session_state.history_page = current_page + 1
-                    st.rerun()
-        else:
-            st.info("目前沒有分析紀錄。")
-    except requests.exceptions.RequestException:
-        st.info("API 伺服器啟動後才能讀取歷史紀錄。")
+                previous_col, status_col, next_col = st.columns([1, 1.4, 1])
+                with previous_col:
+                    if st.button("上一頁", disabled=current_page <= 1, use_container_width=True):
+                        st.session_state.history_page = current_page - 1
+                        st.rerun()
+                with status_col:
+                    selected_page = st.selectbox(
+                        "頁碼選擇",
+                        range(1, total_pages + 1),
+                        index=current_page - 1,
+                        format_func=lambda page_number: f"第 {page_number} / {total_pages} 頁",
+                        label_visibility="collapsed",
+                    )
+                    if selected_page != current_page:
+                        st.session_state.history_page = selected_page
+                        st.rerun()
+                with next_col:
+                    if st.button("下一頁", disabled=current_page >= total_pages, use_container_width=True):
+                        st.session_state.history_page = current_page + 1
+                        st.rerun()
+            else:
+                st.info("目前沒有分析紀錄。")
+        except requests.exceptions.RequestException:
+            st.info("API 伺服器啟動後才能讀取歷史紀錄。")
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
